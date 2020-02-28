@@ -143,4 +143,98 @@ for i=1:6
     xlabel('Resistance device to device(HRS)');
 end
 fig_count=fig_count+1;
-    
+%% %%%%%%%%%%%%% Conductance plots
+
+
+G_HRS_100devices=1./HRS_100devices;
+G_LRS_100devices=1./LRS_100devices;
+G_HRS_100cycles=1./HRS_100cycles;
+G_LRS_100cycles=1./LRS_100cycles;
+
+figure(fig_count)
+for i=1:6
+    subplot(2,3,i)
+    probplot(distribution(i),G_LRS_100cycles)
+    legend('Fitting',strcat('G_{LRS} cycle to cycle at Vread =',num2str(target)),'Location','best')
+    grid on
+    xlabel('Conductance Cycle to Cycle(LRS)');
+end
+fig_count=fig_count+1;
+
+figure(fig_count)
+for i=1:6
+    subplot(2,3,i)
+    probplot(distribution(i),G_HRS_100cycles)
+    legend('Fitting',strcat('G_{HRS} cycle to cycle at Vread =',num2str(target)),'Location','best')
+    grid on
+    xlabel('Conductance Cycle to Cycle(HRS)');
+end
+fig_count=fig_count+1;
+
+figure(fig_count)
+for i=1:6
+    subplot(2,3,i)
+    probplot(distribution(i),G_LRS_100devices)
+    legend('Fitting',strcat('G_{LRS} cycle to cycle at Vread =',num2str(target)),'Location','best')
+    grid on
+    xlabel('Conductance Device to Device(LRS)');
+end
+fig_count=fig_count+1;
+
+figure(fig_count)
+for i=1:6
+    subplot(2,3,i)
+    probplot(distribution(i),G_HRS_100devices)
+    legend('Fitting',strcat('G_{HRS} cycle to cycle at Vread =',num2str(target)),'Location','best')
+    grid on
+    xlabel('Conductance Device to Device(HRS)');
+end
+fig_count=fig_count+1;
+%%   Chi square QQplot
+figure()
+aval=10:5:60;
+aval=[5 aval];
+for i=1:length(aval)
+    pd = makedist('Gamma','a',aval(i),'b',0.5);
+    subplot(3,4,i)
+    qqplot(LRS_100cycles,pd)
+    legend('Fitting',strcat('LRS cycle to cycle for k =',num2str(2*aval(i))),'Location','best')
+    grid on
+    xlabel('Theoretical Quantiles');
+end
+
+figure()
+aval=10:5:55;
+aval=[1 5 aval];
+for i=1:length(aval)
+    pd = makedist('Gamma','a',aval(i),'b',0.5);
+    subplot(3,4,i)
+    qqplot(HRS_100cycles,pd)
+    legend('Fitting',strcat('HRS cycle to cycle for k =',num2str(2*aval(i))),'Location','best')
+    grid on
+    xlabel('Theoretical Quantiles');
+end
+
+figure()
+aval=10:5:55;
+aval=[0.5 5 aval];
+for i=1:length(aval)
+    pd = makedist('Gamma','a',aval(i),'b',0.5);
+    subplot(3,4,i)
+    qqplot(LRS_100devices,pd)
+    legend('Fitting',strcat('LRS device to device for k =',num2str(2*aval(i))),'Location','best')
+    grid on
+    xlabel('Theoretical Quantiles');
+end
+
+figure()
+aval=10:5:55;
+aval=[0.5 5 aval];
+for i=1:length(aval)
+    pd = makedist('Gamma','a',aval(i),'b',0.5);
+    subplot(3,4,i)
+    qqplot(HRS_100devices,pd)
+    legend('Fitting',strcat('HRS device to device for k =',num2str(2*aval(i))),'Location','best')
+    grid on
+    xlabel('Theoretical Quantiles');
+end
