@@ -1,10 +1,12 @@
 clc
 clear all
 close all
-
+%%
+distribution=["normal", "lognormal", "weibull", "rayleigh", "logistic", "exponential"];
 %% data load -----> format  xlsread('filengthame.xlsx','sheet name')
-data_100cycle=xlsread('100devices.xlsx','100cycles');
-data_100devices=xlsread('100devices.xlsx','devices');
+filename='100devices.xlsx';
+data_100cycle=xlsread(filename,'100cycles');
+data_100devices=xlsread(filename,'devices');
 
 %% Read voltage
 
@@ -29,7 +31,7 @@ while icol<=total_col-1
     end
     
     if length(V_index)~=2
-        print('More than two values exists in current, so LRS and HRS are not sufficient')
+        print('More/less than two values exists in current, so LRS and HRS are not sufficient')
         break
     else
         I_sorted=sort(I_val);
@@ -40,21 +42,21 @@ while icol<=total_col-1
     i=i+1;
     icol=icol+2;
 end
-        
-figure            
-subplot(1,2,1)
-probplot(LRS_100cycles)
-legend('Fitting',strcat('LRS Resistance at Vread =',num2str(target)),'Location','best')
-grid on
-xlabel('Resistance Cycle to Cycle(LRS)');
-%title('Cycle to Cycle vartiation');
-
-subplot(1,2,2)
-probplot('lognormal',HRS_100cycles)
-%legend('Fitting','HRS Resistance at Vread =-0.1 V','Location','best')
-legend('Fitting',strcat('HRS Resistance at Vread =',num2str(target)),'Location','best')
-grid on
-xlabel('Resistance Cycle to Cycle(HRS)');      
+%         
+% figure            
+% subplot(3,3,1)
+% probplot(distribution(1),LRS_100cycles)
+% legend('Fitting',strcat('LRS Resistance at Vread =',num2str(target)),'Location','best')
+% grid on
+% xlabel('Resistance Cycle to Cycle(LRS)');
+% %title('Cycle to Cycle vartiation');
+% str=['lognormal'];
+% subplot(3,3,2)
+% probplot(str,HRS_100cycles)
+% %legend('Fitting','HRS Resistance at Vread =-0.1 V','Location','best')
+% legend('Fitting',strcat('HRS Resistance at Vread =',num2str(target)),'Location','best')
+% grid on
+% xlabel('Resistance Cycle to Cycle(HRS)');      
 %% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Variable declaration for device to device
 [total_row,total_col]=size(data_100devices);
@@ -73,7 +75,7 @@ while icol<=total_col-1
     end
     
     if length(V_index)~=2
-        print('More than two values exists in current, so LRS and HRS are not sufficient')
+        print('More/less than two values exists in current, so LRS and HRS are not sufficient')
         break
     else
         I_sorted=sort(I_val);
@@ -84,18 +86,61 @@ while icol<=total_col-1
     icol=icol+2;
 end
 
-figure(2)            
-subplot(1,2,1)
-probplot(LRS_100devices)
-legend('Fitting',strcat('LRS Resistance at Vread =',num2str(target)),'Location','best')
-grid on
-xlabel('Resistance Device to Device(LRS)');
+% figure(2)            
+% subplot(1,2,1)
+% probplot(LRS_100devices)
+% legend('Fitting',strcat('LRS Resistance at Vread =',num2str(target)),'Location','best')
+% grid on
+% xlabel('Resistance Device to Device(LRS)');
+% 
+% subplot(1,2,2)
+% probplot('lognormal',HRS_100devices)
+% %legend('Fitting','HRS Resistance at Vread =-0.1 V','Location','best')
+% legend('Fitting',strcat('HRS Resistance at Vread =',num2str(target)),'Location','best')
+% grid on
+% xlabel('Resistance Device to Device(HRS)');
 
-subplot(1,2,2)
-probplot('lognormal',HRS_100devices)
-%legend('Fitting','HRS Resistance at Vread =-0.1 V','Location','best')
-legend('Fitting',strcat('HRS Resistance at Vread =',num2str(target)),'Location','best')
-grid on
-xlabel('Resistance Device to Device(HRS)');
 
+fig_count=1;
+
+%% All distribution LRS plot for cycle to cycle
+figure(fig_count)
+for i=1:6
+    subplot(2,3,i)
+    probplot(distribution(i),LRS_100cycles)
+    legend('Fitting',strcat('LRS cycle to cycle at Vread =',num2str(target)),'Location','best')
+    grid on
+    xlabel('Resistance Cycle to Cycle(LRS)');
+end
+fig_count=fig_count+1;
+%% All distribution HRS plot for cycle to cycle
+figure(fig_count)
+for i=1:6
+    subplot(2,3,i)
+    probplot(distribution(i),HRS_100cycles)
+    legend('Fitting',strcat('HRS cycle to cycle at Vread =',num2str(target)),'Location','best')
+    grid on
+    xlabel('Resistance Cycle to Cycle(HRS)');
+end
+fig_count=fig_count+1;
+%% All distribution LRS plot for device to device
+figure(fig_count)
+for i=1:6
+    subplot(2,3,i)
+    probplot(distribution(i),LRS_100devices)
+    legend('Fitting',strcat('LRS device to device at Vread =',num2str(target)),'Location','best')
+    grid on
+    xlabel('Resistance device to device(LRS)');
+end
+fig_count=fig_count+1;
+%% All distribution HRS plot for device to device
+figure(fig_count)
+for i=1:6
+    subplot(2,3,i)
+    probplot(distribution(i),HRS_100devices)
+    legend('Fitting',strcat('HRS device to device at Vread =',num2str(target)),'Location','best')
+    grid on
+    xlabel('Resistance device to device(HRS)');
+end
+fig_count=fig_count+1;
     
