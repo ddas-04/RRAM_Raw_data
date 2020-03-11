@@ -160,6 +160,22 @@ phi_staedy_state=np.load('phi_steady_state.npy')
 total_probability=trapz(Xvalues,phi_staedy_state)
 
 print('Total probability = ' + str(total_probability))
+############### plot of log(rho) ##########################
+xdata=Xvalues[0:len(Xvalues)-1]
+#ydata=np.log(phi_staedy_state)
+ydata=phi_staedy_state
+
+fig = plt.figure(figsize=(10,8))
+ax = fig.add_subplot(1, 1, 1)
+line, = ax.plot(xdata,ydata, linewidth=2)
+ax.set_yscale('log')
+plt.xlabel('Xgrid')
+#plt.ylabel(r"$log(\rho)$")
+plt.ylabel(r"$\rho$")
+
+plt.grid()
+plt.show()
+
 
 if __name__ == '__main__':
     input("Transient drift-diffusion. Press <return> to proceed...")
