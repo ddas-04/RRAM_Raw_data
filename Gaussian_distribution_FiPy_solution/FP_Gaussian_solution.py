@@ -14,6 +14,7 @@ def trapz(x,y):
 
 from fipy import *
 import numpy as np
+import scipy
 import matplotlib.pyplot as plt
 plt.rcParams.update({'font.size':15})
 
@@ -21,8 +22,8 @@ plt.rcParams.update({'font.size':15})
 
 
 ################ Set up simulation grid #######################
-nx = 100e3;
-dx = 1.0e-3;
+nx = 100e2;
+dx = 1.0e-2;
 L = nx * dx
 midPoint = L / 2
 mesh = Grid1D(nx=nx, dx=dx)
@@ -32,7 +33,7 @@ mu=midPoint
 sigma=L/8
 
 ################ Defining Phi variable #######################
-phi = CellVariable(name="solution variable", 
+phi = FaceVariable(name="solution variable", 
                    mesh=mesh,
                    value=1/L)
 '''
@@ -71,10 +72,28 @@ CValues=np.load('C_values.npy')
 const_F=1.0/((sigma)*np.sqrt(2*numerix.pi))
 exp_power=-((Xvalues-mu)**2)/(2*sigma**2)
 Fx=1.0-const_F*np.exp(exp_power)
+
+Fx_act=1-Fx
+
 ##########################################################
 Fx=Fx*scale_factor
+'''
+############# log rho check for parabola #################
+fig = plt.figure(figsize=(10,8))
 
+ax = fig.add_subplot(2, 1, 1)
+line, = ax.plot(Xvalues,(Fx_act))
+plt.grid()
 
+ax = fig.add_subplot(2, 1, 2)
+line, = ax.plot(Xvalues,np.log((Fx_act)))
+plt.grid()
+plt.xlim([Xvalues[0],Xvalues[-1]])
+plt.ylabel('Log')
+plt.show()
+
+exit()
+'''
 ######### Plot of F(x) and its derivative ##################
 fig = plt.figure(figsize=(12,10))
 
@@ -108,16 +127,7 @@ phi.faceGrad.constrain([0.], mesh.facesRight)
 '''
 
 eqX = TransientTerm() == (DiffusionTerm(coeff=D) + PowerLawConvectionTerm(coeff=cCoeff))
-'''
-eq_steady= (ExplicitDiffusionTerm(coeff=D) + PowerLawConvectionTerm(coeff=cCoeff))
-viewer = Viewer(vars=(phi),
-                datamin=0., datamax=15)
-eq_steady.solve(var=phi)
-if __name__ == '__main__':
-        viewer.plot()
 
-exit()
-'''
 viewer = Viewer(vars=(phi),
                 datamin=0., datamax=0.2)
 
@@ -148,22 +158,23 @@ while t_i<number_of_steps:
     t_i=t_i+1
 
 
-
+f=open("Main_result_data.txt","w+")
 
 ############ Save steady-state phi values ####################
 np.save('phi_steady_state.npy',phi)
-phi_staedy_state=[]
-phi_staedy_state=np.load('phi_steady_state.npy')
+phi_steady_state=[]
+phi_steady_state=np.load('phi_steady_state.npy')
 
 #print('shape X = ' +str(np.shape(Xvalues)))
 #print('shape phi = ' +str(np.shape(phi_staedy_state)))
-total_probability=trapz(Xvalues,phi_staedy_state)
-
+total_probability=trapz(Xvalues,phi_steady_state)
+f.write("Total Probability = %f\r\n" % (total_probability))
 print('Total probability = ' + str(total_probability))
 ############### plot of log(rho) ##########################
 xdata=Xvalues[0:len(Xvalues)-1]
+print(type(xdata))
 #ydata=np.log(phi_staedy_state)
-ydata=phi_staedy_state
+ydata=phi_steady_state
 
 fig = plt.figure(figsize=(10,8))
 ax = fig.add_subplot(1, 1, 1)
@@ -175,8 +186,46 @@ plt.ylabel(r"$\rho$")
 
 plt.grid()
 plt.show()
+############### Calculation of CDF ######################
 
 
+N=len(phi_steady_state)
+CDF=np.zeros(N)
+i=2
+median=[]
+while i<=N:
+	print('i = '+str(i))
+	x=xdata[0:i]
+	y=phi_steady_state[0:i]
+	CDF[i-1]=trapz(x,y)
+	print('CDF='+str(CDF[i-1]))
+	print('---------------------------------------------')
+	if CDF[i-1]>=0.5:
+		median_val=x[-1]
+		median=np.append(median,median_val)
+	i=i+1
+print('Median = '+str(median[0]))
+f.write("Median = %f\r\n" % (median[0]))
+
+fig = plt.figure(figsize=(12,10))
+
+ax = fig.add_subplot(2, 1, 1)
+line, = ax.plot(xdata,phi_steady_state, linewidth=2)
+plt.xlabel('Xgrid')
+plt.ylabel(r"$\rho$")
+plt.ylim([0,0.2])
+plt.grid()
+#plt.show()
+
+ax = fig.add_subplot(2, 1, 2)
+line, = ax.plot(xdata,CDF, linewidth=2)
+plt.grid()
+plt.xlabel('Xgrid')
+plt.ylabel('CDF')
+fig.savefig('CDF.png')
+plt.show()
+
+f.close() 
 if __name__ == '__main__':
     input("Transient drift-diffusion. Press <return> to proceed...")
 
